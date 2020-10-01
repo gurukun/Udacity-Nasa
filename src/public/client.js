@@ -1,7 +1,9 @@
 let store = {
   user: { name: "Student" },
-  apod: "",
-  rovers: false,
+  apod: false,
+  rovers: ["curiosity", "spirit", "opportunity"],
+  status: false,
+  selectedRover: false,
 };
 
 // add our markup to the page
@@ -18,25 +20,18 @@ const render = async (root, state) => {
 
 // create content
 const App = state => {
-  let { rovers, apod } = state;
+  let { rovers, apod, status, selectedRover } = state;
+  console.log(rovers, selectedRover);
 
   return `
         <header></header>
         <main>
             ${Greeting(store.user.name)}
             <section>
-                <h3>Put things on the page!</h3>
-                <p>Here is an example section.</p>
-                <p>
-                    One of the most popular websites at NASA is the Astronomy Picture of the Day. In fact, this website is one of
-                    the most popular websites across all federal agencies. It has the popular appeal of a Justin Bieber video.
-                    This endpoint structures the APOD imagery and associated metadata so that it can be repurposed for other
-                    applications. In addition, if the concept_tags parameter is set to True, then keywords derived from the image
-                    explanation are returned. These keywords could be used as auto-generated hashtags for twitter or instagram feeds;
-                    but generally help with discoverability of relevant imagery.
-                </p>
+                <h3>Image/Video of the day</h3>
+              
                 ${ImageOfTheDay(apod)}
-                ${RoverData(rovers)}
+                ${RoverData(apod, rovers, status, selectedRover)}
             </section>
         </main>
         <footer></footer>
@@ -67,12 +62,16 @@ const ImageOfTheDay = apod => {
   if (!apod || apod.date === today.getDate()) {
     getImageOfTheDay(store);
   }
+
+  if (apod.image.code === 404) {
+    return `<p>No data is available</p>`;
+  }
   // check if the photo of the day is actually type video!
-  if (apod.media_type === "video") {
+  else if (apod.image.media_type === "video") {
     return `
-            <p>See today's featured video <a href="${apod.url}">here</a></p>
-            <p>${apod.title}</p>
-            <p>${apod.explanation}</p>
+            <p>See today's featured video <a href="${apod.image.url}">here</a></p>
+            <p>${apod.image.title}</p>
+            <p>${apod.image.explanation}</p>
         `;
   } else {
     return `
@@ -82,51 +81,78 @@ const ImageOfTheDay = apod => {
   }
 };
 
-const RoverData = rovers => {
-  if (!rovers) {
-    return `<p>"Choose a rover to see the latest image!"</p>`;
-  } else if (
-    rovers === "curiosity" ||
-    rovers === "opportunity" ||
-    rovers === "spirit"
-  ) {
-    console.log(rovers); //returns rover name
-    getRoverData(rovers, store);
+const RoverData = (apod, rovers, status, selectedRover) => {
+  console.log("apod:" + apod, selectedRover, rovers);
+
+  if (apod && !status && !selectedRover) {
+    getRoverData(store);
+    return `<p>hi</p>`;
+  }
+  if (apod && status && !selectedRover) {
+    console.log("middle of condition");
+    return `<h3>pictures from mars!</h3>
+    <img src="${store.rovers[0].img_src}" height=200"px" width="30%" />
+    <img src="${store.rovers[1].img_src}" height=200"px" width="30%" />
+    <img src="${store.rovers[2].img_src}" height=200"px" width="30%" />
+    <p>choose a rover for more details</p>
+    `;
   } else {
-    console.log(rovers);
+    console.log("last", selectedRover);
+    const data = rovers.filter(
+      obj => obj.rover.name.toLowerCase() === selectedRover
+    );
+
     return `
-            <h3>Picture from Mars!</h3>
-            <img src="${rovers.rover.latest_photos[0].img_src}" height=600"px" width="100%" />
-            <p>Photo ID : ${rovers.rover.latest_photos[0].id}</p>
-            <p>Date : ${rovers.rover.latest_photos[0].earth_date}
-             `;
+    <h3>Picture from Mars!</h3>
+    <img src="${data[0].img_src}" height=600"px" width="100%" />
+    <p>Photo ID : ${data[0].id}</p>
+    <p>Date : ${data[0].earth_date}</p>`;
   }
 };
 
 const getImageOfTheDay = state => {
   let { apod } = state;
 
-  fetch(`http://localhost:3000/apod`)
+  return fetch(`http://localhost:3000/apod`)
     .then(res => res.json())
     .then(apod => updateStore(store, { apod }));
 };
 
-const getRoverData = (rover, state) => {
-  console.log(state);
-  let { rovers } = state;
-  //mapで３つ全部のデータを入れる？
-  //rovers をデフォルトアレイにして、３つの名前を入れる＝＞それをMapでオブジェクトに返す。
-  fetch("/mars?rover=" + rover)
-    .then(res => res.json())
-    .then(rovers => updateStore(store, { rovers }));
-};
+function fetching(rovers) {
+  let urls = rovers.map(rover => "/mars?rover=" + rover);
+  let data = Promise.all(
+    urls.map(url => {
+      return fetch(url)
+        .then(res => res.json())
+        .then(res => res.rover.latest_photos[0]);
+    })
+  );
+  return data;
+}
+
+async function getRoverData(state) {
+  let { rovers, selectedRover } = state;
+  Object.assign(store, { status: true });
+
+  console.log("inside getrover", selectedRover);
+
+  rovers = await fetching(rovers);
+
+  let names = rovers.map(x => x.rover.name);
+  console.log(names);
+  updateStore(store, { rovers }); //updatastoreの方がいい？
+
+  //return fetch("/mars?rover=" + rover).then(res => res.json());
+}
 
 window.addEventListener("load", () => {
   render(root, store);
 });
 
 document.getElementById("rovers").addEventListener("change", () => {
-  rovers = document.getElementById("rovers").value;
-  store = Object.assign(store, { rovers });
+  selectedRover = document.getElementById("rovers").value;
+  console.log(selectedRover);
+  store = Object.assign(store, { selectedRover });
+  console.log(store, "inside of event");
   render(root, store);
 });
