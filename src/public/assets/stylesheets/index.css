@@ -3,32 +3,101 @@
 body {
   display: flex;
   flex-direction: column;
-  font-family: Arial;
+  font-family: Lato, sans-serif;
   min-height: 100vh;
 }
 
 header {
-  /* header styles */
+  color: #888888;
+  font-size: 2em;
+  font-weight: bold;
+  padding: 20px 0px 0px 20px;
 }
 
 main {
   flex: 1;
-  padding: 20px;
+  padding: 16px;
+}
+
+h3 {
+  text-align: center;
+}
+img {
+  max-height: 100%;
+  max-width: 100%;
+}
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tablinks {
+  width: 25%;
+}
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  text-align: center;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: darkgray;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
 }
 
 footer {
-  /* footer styles */
+  color: white;
+  background-color: darkgray;
+  text-align: right;
+  padding: 16px;
+  margin-left: 16px;
+  margin-right: 16px;
 }
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
-  /* use mobile */
+  img {
+    height: 350px;
+    width: 100%;
+  }
 }
 
 /* -------------------  DESKTOP  -------------------- */
 
 @media (min-width: 1224px) {
-  /* use mobile */
+  img {
+    height: 350px;
+    width: 100%;
+  }
 }
 
 /* -------------------  LARGE SCREENS  -------------- */

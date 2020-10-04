@@ -12,13 +12,10 @@ app.use(bodyParser.json());
 
 app.use("/", express.static(path.join(__dirname, "../public")));
 
-// your API calls
-
-// example API call
 app.get("/apod", async (req, res) => {
   try {
     let image = await fetch(
-      `https://api.nasa.gov/planetary/apod?api_key=lUEtMPNHdOnVLFKnnpeeVWM3t7GiyQPKDao3Sj7m`
+      `https://api.nasa.gov/planetary/apod?api_key=${process.env.API_KEY}`
     ).then(res => res.json());
     res.send({ image });
   } catch (err) {
@@ -33,9 +30,7 @@ app.get("/mars", async (req, res) => {
     } else {
       let name = req.query.rover;
       let rover = await fetch(
-        "https://api.nasa.gov/mars-photos/api/v1/rovers/" +
-          name +
-          "/latest_photos?&api_key=lUEtMPNHdOnVLFKnnpeeVWM3t7GiyQPKDao3Sj7m"
+        `https://api.nasa.gov/mars-photos/api/v1/rovers/${name}/latest_photos?&api_key=${process.env.API_KEY}`
       ).then(res => res.json());
       res.send({ rover });
     }
@@ -45,6 +40,3 @@ app.get("/mars", async (req, res) => {
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
-//https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?&api_key=DEMO_KEY
-//latest pictures api change rovers name after 'rovers'

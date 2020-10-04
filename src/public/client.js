@@ -18,37 +18,30 @@ const render = async (root, state) => {
 
 // create content
 const App = state => {
-  if (!state.get("selectedRover")) {
-    return `<header></header>
-        <main>
+  if (state.get("selectedRover") === "apod" || state.get("apod")) {
+    return `<main>
             <section>
             <h3>Image/Video of the day</h3>
             ${ImageOfTheDay(state.get("apod"))}
             </section>
-            </main>
-            <footer></footer>`;
+            </main>`;
   } else {
-    return `<header></header>
-    <main>
+    return `<main>
     <section>
         <main>${latestRoverData(state)}
       </section>
      </main>
-     <footer></footer>`;
+     `;
   }
 };
 
 // ------------------------------------------------------  COMPONENTS
 
-// Pure function that renders conditional information -- THIS IS JUST AN EXAMPLE, you can delete it.
-
 const ImageOfTheDay = apod => {
-  const today = new Date();
-  const photodate = new Date(apod.date);
-  //console.log(photodate.getDate(), today.getDate());
-  //console.log(photodate.getDate() === today.getDate());
   if (!apod) {
-    getImageOfTheDay();
+    return getImageOfTheDay();
+  } else if (apod.getIn(["image", "code"])) {
+    return ` <h2>Sorry. No data is avaialable at the moment😞</h2>`;
   } else if (apod.getIn(["image", "media_type"]) === "video") {
     return `
             <p>See today's featured video <a href="${apod.getIn([
@@ -60,11 +53,9 @@ const ImageOfTheDay = apod => {
         `;
   } else {
     return `
-    
-            <img src="${apod.getIn([
-              "image",
-              "url",
-            ])}" height="350px" width="100%" />
+
+            <img src="${apod.getIn(["image", "url"])}"  class="center">
+            <h3>${apod.getIn(["image", "title"])} </h3>
             <p>${apod.getIn(["image", "explanation"])}</p>`;
   }
 };
@@ -74,17 +65,21 @@ const latestRoverData = state => {
   let { selectedRover, rovers } = store;
 
   if (typeof rovers[0] === "string") {
-    getRoverData(state);
+    return getRoverData(state);
   } else {
-    const data1 = rovers.filter(
+    const data = rovers.filter(
       obj => obj.rover.name.toLowerCase() === selectedRover
     );
 
     return `
     <h3>Picture from Mars!</h3>
-    <img src="${data1[0].img_src}" height=600"px" width="100%" />
-    <p>Photo ID : ${data1[0].id}</p>
-    <p>Date : ${data1[0].earth_date}</p>`;
+    <img src="${data[0].img_src}" class="center">
+    <p>Photo ID : ${data[0].id}</p>
+    <p>Photo taken on : ${data[0].earth_date}</p>
+    <p>Rover Launch Date : ${data[0].rover.launch_date}</p>
+    <p>Rover Landing Date : ${data[0].rover.landing_date}</p>
+    <p>Rover Status: ${data[0].rover.status}</p>  
+    `;
   }
 };
 
@@ -94,7 +89,7 @@ const getImageOfTheDay = () => {
     .then(apod => updateStore(store, { apod }));
 };
 
-function fetching(rovers) {
+const fetchFunc = rovers => {
   let urls = rovers.map(rover => "/mars?rover=" + rover);
   let data = Promise.all(
     urls.map(url => {
@@ -104,19 +99,14 @@ function fetching(rovers) {
     })
   );
   return data;
-}
+};
 
 async function getRoverData(state) {
-  rovers = await fetching(state.get("rovers"));
+  rovers = await fetchFunc(state.get("rovers"));
   let newStore = store.set("selectedRover", state.get("selectedRover"));
   updateStore(newStore, { rovers });
 }
 
-window.addEventListener("load", () => {
-  render(root, store);
-});
-
-document.getElementById("rovers").addEventListener("change", () => {
-  let selectedRover = document.getElementById("rovers").value;
+const getData = selectedRover => {
   updateStore(store, { selectedRover });
-});
+};

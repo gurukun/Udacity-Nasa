@@ -5,22 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.2/immutable.min.js"></script>
-
+    <link rel="stylesheet" href="./assets/stylesheets/index.css" />
     <title>Document</title>
   </head>
 
   <body>
+    <header>Mars Dashboad</header>
     <main>
-      <h3>Browse latest pictures from Mars</h3>
-      <select id="rovers">
-        <option value="curiosity">Curiosity</option>
-        <option value="opportunity">Opportunity</option>
-        <option value="spirit">Spirit</option>
-      </select>
+      <div class="tab">
+        <button class="tablinks" onclick="getData('apod')" id="defaultOpen">
+          Astronomy Picture of the Day
+        </button>
+        <button class="tablinks" onclick="getData('curiosity')">
+          Curiosity
+        </button>
+        <button class="tablinks" onclick="getData('opportunity')">
+          Opportunity
+        </button>
+        <button class="tablinks" onclick="getData('spirit')">Spirit</button>
+      </div>
+
       <div id="root">
         <h1>Loading...</h1>
       </div>
     </main>
+    <footer>Udacity Mars Dashboad project</footer>
   </body>
   <script src="/client.js"></script>
+  <script>
+    document.getElementById("defaultOpen").click();
+  </script>
 </html>
