@@ -48,8 +48,8 @@ const ImageOfTheDay = apod => {
               "image",
               "url",
             ])}">here</a></p>
-            <p>${apod.getIn("image", "title")}</p>
-            <p>${apod.getIn("image", "explanation")}</p>
+            <p>${apod.getIn(["image", "title"])}</p>
+            <p>${apod.getIn(["image", "explanation"])}</p>
         `;
   } else {
     return `
